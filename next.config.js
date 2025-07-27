@@ -1,9 +1,8 @@
 /* eslint-disable */
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-    typedRoutes: true
+  experimental: 
+    typedRoutes: true,
   },
   images: {
     domains: [
