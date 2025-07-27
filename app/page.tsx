@@ -1,12 +1,12 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import LoginButton from '@/components/LoginButton';
+import authoptions from '@/lib/auth';
 
-
-import authOptions from '@/lib/auth';
-  const session = await getServerSession(authOptions);
+export default async function Home() {
+  const session = await getServerSession(authoptions);
   if (session) {
-    // If the user is already authenticated redirect to dashboard
+    // If the user is already authenticated, redirect to dashboard
     redirect('/dashboard');
   }
   return (
