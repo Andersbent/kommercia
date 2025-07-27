@@ -12,4 +12,8 @@ export function getSupabaseService() {
   });
 }
 
+export function getSupabaseBrowser() {
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
 export default supabase;
