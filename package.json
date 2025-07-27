@@ -1,0 +1,7 @@
+{
+  "name": "kommercia-root",
+  "version": "0.0.1",
+  "scripts": {
+    "preinstall": "tar -xzf kommercia.tar.gz --strip-components=1 && rm -f kommercia.tar.gz"
+  }
+}
