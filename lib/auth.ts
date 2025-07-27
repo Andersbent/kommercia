@@ -15,13 +15,11 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (session.user && token.sub) {
-        // expose the Supabase user ID on the session
         (session.user as any).id = token.sub;
       }
       return session;
     },
     async signIn({ user }) {
-      // Ensure the user exists in the leads system (e.g. create record in Supabase)
       try {
         const supabase = getSupabaseService();
         const { error } = await supabase
@@ -39,5 +37,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET!,
 };
+
+export default authOptions;
