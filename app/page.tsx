@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import LoginButton from '@/components/LoginButton';
-import { authOptions } from './api/auth/[...nextauth]/route';
 
-export default async function Home() {
+
+import authOptions from '@/lib/auth';
   const session = await getServerSession(authOptions);
   if (session) {
     // If the user is already authenticated redirect to dashboard
