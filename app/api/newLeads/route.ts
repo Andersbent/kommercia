@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
     : 'Find små og mellemstore danske virksomheder som potentielt kunne være kunder.';
   // Optionally call Serper to get trending topics (not used directly in this example)
   try {
-    await searchSerper('danske virksomheder news', 5);
-  } catch (err) {
+    await searchSerper('danske virksomheder news'
+  } catch (err) 
     console.warn('Serper search failed', err);
   }
   // Generate leads via GPT
