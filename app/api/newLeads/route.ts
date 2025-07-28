@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
-import { getSupabaseService } from '@/lib/supabase';
+
+import authOptions from '@/lib/auth';
 import { generateLeads } from '@/lib/openai';
 import { searchSerper } from '@/lib/serper';
 
