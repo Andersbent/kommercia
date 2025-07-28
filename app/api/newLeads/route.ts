@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/auth';
 import { generateLeads } from '@/lib/openai';
 import { searchSerper } from '@/lib/serper';
+import { getSupabaseService } from '@/lib/supabase';
+
 
 /**
  * POST /api/newLeads
