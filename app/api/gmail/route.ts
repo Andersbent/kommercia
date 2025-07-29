@@ -14,7 +14,6 @@ import { fetchRecentMessages, extractEmailAddress } from '@/lib/gmail';
  * Only authenticated users can access this endpoint.
  */
 export async function GET(req: NextRequest) {
-export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
