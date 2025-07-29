@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-
 import authOptions from '@/lib/auth';
-import { generateLeads } from '@/lib/openai';
-import { searchSerper } from '@/lib/serper';
+import { generateAILeads } from '@/lib/openai';
 import { getSupabaseService } from '@/lib/supabase';
-
 
 /**
  * POST /api/newLeads
  *
- * This endpoint generates a batch of new leads using GPT‑4 and Serper.dev based on the
- * current user's existing leads. The generated leads are inserted into the database
- * with status `new`. Requires authentication.
+ * Generates a fresh batch of AI‑generated leads based on a fixed
+ * market definition (B2B companies in Denmark or Northern Germany with
+ * green, logistics or production profiles). Requires the user to be
+ * authenticated via NextAuth. The returned leads are inserted into
+ * the `ai_leads` table associated with the current user. Duplicate
+ * entries for the same company/contact are avoided via an upsert on
+ * user_id + company.
  */
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -20,57 +21,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const userId = (session.user as any).id;
-  const { count = 10 } = (await req.json().catch(() => ({}))) as {
-    count?: number;
-  };
   const supabase = getSupabaseService();
-  // Fetch existing leads to learn preferences (company names)
-  const { data: existing } = await supabase
-    .from('leads')
-    .select('company')
-    .eq('user_id', userId)
-    .limit(20);
-  const companies = (existing ?? [])
-    .map((l) => l.company)
-    .filter(Boolean) as string[];
-  // Compose a simple prompt for GPT based on existing companies
-  const prompt = companies.length
-    ? `Mine bedste kunder er: ${companies.join(
-        ', '
-      )}. Find lignende virksomheder i samme brancher i Danmark.`
-    : 'Find små og mellemstore danske virksomheder som potentielt kunne være kunder.';
-  // Optionally call Serper to get trending topics (not used directly in this example)
-  try {
-    await searchSerper('danske virksomheder news');
-} catch (err) {
-    console.warn('Serper search failed', err);
-}
-  // Generate leads via GPT
-  const generated = await generateLeads(prompt);
-  if (!Array.isArray(generated)) {
+  // Invoke the AI to generate a list of leads. This call may take
+  // several seconds as it contacts OpenAI.
+  const generated = await generateAILeads();
+  if (!Array.isArray(generated) || generated.length === 0) {
     return NextResponse.json({ error: 'Failed to generate leads' }, { status: 500 });
   }
-  // Insert leads into DB; avoid duplicates by company+name
+  // Upsert each lead into the ai_leads table. We use upsert on
+  // user_id and company to avoid duplicates across runs.
+  let inserted = 0;
   for (const lead of generated) {
-    const name: string =
-      lead.contactPerson || lead.name || lead.contact || 'Ukendt kontakt';
-    const company: string | null = lead.companyName || lead.company || null;
-    const email: string | null = lead.email || null;
-    const phone: string | null = lead.phone || null;
-    // Upsert logic: we attempt to insert; if conflict on user_id+name+company we ignore
-    await supabase
-      .from('leads')
+    const { company, website, contactPerson, email, phone } = lead;
+    if (!company) continue;
+    const { error } = await supabase
+      .from('ai_leads')
       .upsert(
         {
           user_id: userId,
-          name,
           company,
-          status: 'new',
-          email,
-          phone
+          website: website ?? null,
+          contact_person: contactPerson ?? null,
+          email: email ?? null,
+          phone: phone ?? null,
         },
-        { onConflict: 'id' }
+        { onConflict: 'user_id,company' }
       );
+    if (!error) inserted++;
   }
-  return NextResponse.json({ inserted: generated.length });
+  return NextResponse.json({ inserted });
 }
