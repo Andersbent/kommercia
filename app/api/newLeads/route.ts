@@ -34,7 +34,9 @@ export async function POST(req: NextRequest) {
   // this to that table instead.
   let inserted = 0;
   for (const lead of generated) {
-    const name: string = lead.contactPerson || lead.contact_person || 'Ukendt kontakt';
+    // Some AI responses may use either camelCase (contactPerson) or snake_case (contact_person).
+    // Cast to any to avoid TypeScript complaints about unknown properties.
+    const name: string = (lead as any).contactPerson || (lead as any).contact_person || 'Ukendt kontakt';
     const company: string | null = (lead.company as any) || null;
     const email: string | null = (lead.email as any) || null;
     const phone: string | null = (lead.phone as any) || null;
