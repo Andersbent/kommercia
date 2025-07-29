@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     console.warn('Serper search failed', err);
 }
   // Generate leads via GPT
-  const generated = await generateLeads(prompt, count);
+  const generated = await generateLeads(prompt);
   if (!Array.isArray(generated)) {
     return NextResponse.json({ error: 'Failed to generate leads' }, { status: 500 });
   }
