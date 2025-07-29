@@ -1,4 +1,4 @@
-import type { Config } from tailwindcss';
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
@@ -18,7 +18,7 @@ const config: Config = {
           interested: '#FBBF24', // yellow
           negotiation: '#F97316', // orange
           won: '#10B981', // green
-          lost: '#EF4444' // red
+          lost: '#FF4444' // red
         }
       },
       fontFamily: {
