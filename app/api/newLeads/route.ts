@@ -11,7 +11,7 @@ import { getSupabaseService } from '@/lib/supabase';
  * market definition (B2B companies in Denmark or Northern Germany with
  * green, logistics or production profiles). Requires the user to be
  * authenticated via NextAuth. The returned leads are inserted into
- * the `leads` table associated with the current user. Duplicate
+ * the `ai_leads` table associated with the current user. Duplicate
  * entries for the same company/contact are avoided via an upsert on
  * user_id + company.
  */
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   // this to that table instead.
   let inserted = 0;
   for (const lead of generated) {
-    const name: string = (lead as any).contactPerson || (lead as any).contact_person || 'Ukendt kontakt';
+    const name: string = lead.contactPerson || lead.contact_person || 'Ukendt kontakt';
     const company: string | null = (lead.company as any) || null;
     const email: string | null = (lead.email as any) || null;
     const phone: string | null = (lead.phone as any) || null;
@@ -57,5 +57,3 @@ export async function POST(req: NextRequest) {
   }
   return NextResponse.json({ inserted });
 }
-
-
