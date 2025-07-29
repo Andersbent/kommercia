@@ -2,6 +2,15 @@ import GoogleProvider from 'next-auth/providers/google';
 import type { NextAuthOptions } from 'next-auth';
 import { getSupabaseService } from './supabase';
 
+/**
+ * NextAuth configuration for Kommercia.
+ *
+ * This version introduces an email whitelist to restrict access during the MVP
+ * phase. Only users whose email addresses appear in the `allowedEmails` array
+ * will be allowed to sign in. All other login attempts will be rejected
+ * immediately. If the sign‑in succeeds, the user's details are upserted in
+ * Supabase to keep the `users` table in sync.
+ */
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -20,6 +29,13 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user }) {
+      // Restrict access to a fixed list of email addresses
+      const allowedEmails = ['andersraugbentley@gmail.com'];
+      if (!user?.email || !allowedEmails.includes(user.email)) {
+        // Returning false aborts the sign‑in and shows an access denied error
+        return false;
+      }
+      // Sync authorised users into Supabase for later reference
       try {
         const supabase = getSupabaseService();
         const { error } = await supabase
