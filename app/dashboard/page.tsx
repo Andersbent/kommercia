@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import authoptions from '@/lib/auth';
+import authOptions from '@/lib/auth';
 import { getSupabaseService } from '@/lib/supabase';
 import DashboardClient from './DashboardClient';
 
