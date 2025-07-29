@@ -1,16 +1,14 @@
-import type { Config } from 'tailwindcss';
-
-const config: Config = {
+const config = {
   content: [
     './app/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}'
+    './components/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
       colors: {
         brand: {
           DEFAULT: '#0a2540', // primary dark blue
-          light: '#173c62'
+          light: '#173c62', // light blue
         },
         status: {
           new: '#9CA3AF', // gray
@@ -18,15 +16,15 @@ const config: Config = {
           interested: '#FBBF24', // yellow
           negotiation: '#F97316', // orange
           won: '#10B981', // green
-          lost: '#FF4444' // red
-        }
+          lost: '#FF4444', // red
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'Open Sans', 'sans-serif']
-      }
-    }
+        sans: ['Inter', 'Open Sans', 'sans-serif'],
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };
 
 export default config;
