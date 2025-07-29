@@ -14,43 +14,76 @@ import { fetchRecentMessages, extractEmailAddress } from '@/lib/gmail';
  * Only authenticated users can access this endpoint.
  */
 export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const userId = (session.user as any).id;
+  const userEmail = (session.user as any).email as string | undefined;
   const supabase = getSupabaseService();
-  // Fetch the current user's leads with email addresses
+  // Fetch the current user's leads with email addresses. We also fetch
+  // existing response_status to compute minimal updates.
   const { data: leads } = await supabase
     .from('leads')
-    .select('id, email')
+    .select('id, email, response_status')
     .eq('user_id', userId);
   if (!leads || leads.length === 0) {
     return NextResponse.json({ updated: false, reason: 'No leads' });
   }
-  // Fetch recent messages from Gmail
+  // Fetch recent messages from Gmail. We limit to the last 50 messages to
+  // avoid hitting rate limits. Consider using pagination for larger
+  // inboxes.
   const messages = await fetchRecentMessages(50);
   const now = new Date();
+  // We'll accumulate updates keyed by lead id to avoid updating the same
+  // lead multiple times within the loop. The most recent message wins.
+  const updates: Record<string, { last_contact_date: string; most_recent_subject: string | null; response_status: string }> = {};
   for (const msg of messages) {
     const headers = msg.payload?.headers ?? [];
     const from = headers.find((h) => h.name === 'From')?.value;
     const to = headers.find((h) => h.name === 'To')?.value;
-    const subject = headers.find((h) => h.name === 'Subject')?.value;
+    const subject = headers.find((h) => h.name === 'Subject')?.value ?? null;
     const dateStr = headers.find((h) => h.name === 'Date')?.value;
     const messageDate = dateStr ? new Date(dateStr) : now;
-    const address = extractEmailAddress(from || '') ?? extractEmailAddress(to || '');
-    if (!address) continue;
-    const lead = leads.find((l) => l.email && l.email.toLowerCase() === address.toLowerCase());
-    if (lead) {
-      await supabase
-        .from('leads')
-        .update({
-          last_contact_date: messageDate.toISOString(),
-          most_recent_subject: subject ?? null,
-          response_status: 'responded',
-        })
-        .eq('id', lead.id);
+    const fromAddress = extractEmailAddress(from || '')?.toLowerCase();
+    const toAddress = extractEmailAddress(to || '')?.toLowerCase();
+    // Determine which lead this message relates to, if any
+    const lead = leads.find(
+      (l) => (l.email && l.email.toLowerCase() === fromAddress) || (l.email && l.email.toLowerCase() === toAddress)
+    );
+    if (!lead) continue;
+    // Determine the response status. If the lead is the sender we
+    // consider it a "responded" message. If the lead is the
+    // recipient then the user has sent a message and we mark it as
+    // "sent". Otherwise we leave the status unchanged.
+    let status = lead.response_status || 'none';
+    if (fromAddress && lead.email && lead.email.toLowerCase() === fromAddress) {
+      status = 'responded';
+    } else if (
+      toAddress &&
+      lead.email &&
+      lead.email.toLowerCase() === toAddress &&
+      userEmail &&
+      fromAddress &&
+      fromAddress === userEmail.toLowerCase()
+    ) {
+      // User sent an email to the lead
+      status = status === 'responded' ? 'responded' : 'sent';
     }
+    updates[lead.id] = {
+      last_contact_date: messageDate.toISOString(),
+      most_recent_subject: subject,
+      response_status: status,
+    };
   }
-  return NextResponse.json({ updated: true });
+  // Perform bulk updates in parallel
+  const updatePromises = Object.entries(updates).map(([id, update]) =>
+    supabase
+      .from('leads')
+      .update(update)
+      .eq('id', id)
+  );
+  await Promise.all(updatePromises);
+  return NextResponse.json({ updated: true, count: updatePromises.length });
 }
