@@ -1,21 +1,11 @@
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import LoginButton from '@/components/LoginButton';
-import authoptions from '@/lib/auth';
 
-export default async function Home() {
-  const session = await getServerSession(authoptions);
-  if (session) {
-    // If the user is already authenticated, redirect to dashboard
-    redirect('/dashboard');
-  }
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
-      <h1 className="text-4xl font-bold text-brand">Kommercia</h1>
-      <p className="mt-4 max-w-xl text-lg">
-        Your Commercial Department in the Cloud
-      </p>
-      <LoginButton />
-    </main>
-  );
+/**
+ * Default page that redirects visitors to the login screen. This allows the
+ * application to present the Supabase login form instead of relying on
+ * NextAuth’s Google login. Feel free to update the path if you rename
+ * the login route.
+ */
+export default function HomePage() {
+  redirect('/login');
 }
