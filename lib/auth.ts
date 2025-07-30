@@ -29,24 +29,22 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user }) {
-      // Restrict access to a fixed list of email addresses
+      // Restrict access to a fixed list of email addresses.
+      // Only the whitelisted email addresses are allowed to sign in during the MVP phase.
       const allowedEmails = ['andersraugbentley@gmail.com'];
       if (!user?.email || !allowedEmails.includes(user.email)) {
-        // Returning false aborts the sign‑in and shows an access denied error
+        // Returning false aborts the sign‑in and shows an access denied error.
         return false;
       }
-      // Sync authorised users into Supabase for later reference
-      try {
-        const supabase = getSupabaseService();
-        const { error } = await supabase
-          .from('users')
-          .upsert({ id: user.id, name: user.name, email: user.email }, { onConflict: 'id' });
-        if (error) {
-          console.error('Failed to upsert user in Supabase', error);
-        }
-      } catch (err) {
-        console.error('Failed to sync user to Supabase', err);
-      }
+      /*
+       * Previously we attempted to upsert the authenticated user into a "users" table.
+       * However, the Google provider's `sub` identifier is a long numeric string which
+       * is not a valid UUID. Attempting to insert it into a `uuid` column caused
+       * Postgres errors such as "invalid input syntax for type uuid". For the current
+       * single‑user MVP there is no need to persist user records, so we simply return
+       * true here without writing to the database. In a multi‑user environment you
+       * should either map external IDs to UUIDs or store the user email instead.
+       */
       return true;
     },
   },
