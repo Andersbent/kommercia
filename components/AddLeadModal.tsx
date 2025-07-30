@@ -19,7 +19,6 @@ export default function AddLeadModal({ onLeadAdded }: AddLeadModalProps) {
     company: '',
     email: '',
     phone: '',
-    warm_category: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,12 +34,11 @@ export default function AddLeadModal({ onLeadAdded }: AddLeadModalProps) {
       company: form.company || null,
       email: form.email || null,
       phone: form.phone || null,
-      warm_category: form.warm_category || null,
       status: 'new',
     });
     setLoading(false);
     setOpen(false);
-    setForm({ name: '', company: '', email: '', phone: '', warm_category: '' });
+    setForm({ name: '', company: '', email: '', phone: '' });
     await onLeadAdded();
   };
 
@@ -48,79 +46,69 @@ export default function AddLeadModal({ onLeadAdded }: AddLeadModalProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="mt-4 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+        className="mt-4 rounded-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 px-5 py-2 text-white font-medium shadow-md hover:from-green-400 hover:to-teal-400 transition-colors"
       >
         Tilføj lead
       </button>
       {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-md w-full max-w-md p-6">
-            <h2 className="text-lg font-semibold mb-4">Nyt lead</h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-[#0d1333] text-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <h2 className="text-xl font-bold mb-4">Nyt lead</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium">Navn</label>
+                <label className="block text-sm font-medium mb-1">Navn</label>
                 <input
                   required
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="mt-1 w-full rounded border px-2 py-1"
+                  className="mt-1 w-full rounded-md bg-gray-700/60 border border-gray-600 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Kontaktpersonens navn"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">Virksomhed</label>
+                <label className="block text-sm font-medium mb-1">Virksomhed</label>
                 <input
                   name="company"
                   value={form.company}
                   onChange={handleChange}
-                  className="mt-1 w-full rounded border px-2 py-1"
+                  className="mt-1 w-full rounded-md bg-gray-700/60 border border-gray-600 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Firmanavn"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">Email</label>
+                <label className="block text-sm font-medium mb-1">Email</label>
                 <input
                   name="email"
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="mt-1 w-full rounded border px-2 py-1"
+                  className="mt-1 w-full rounded-md bg-gray-700/60 border border-gray-600 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="kontakt@eksempel.dk"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">Telefon</label>
+                <label className="block text-sm font-medium mb-1">Telefon</label>
                 <input
                   name="phone"
                   value={form.phone}
                   onChange={handleChange}
-                  className="mt-1 w-full rounded border px-2 py-1"
+                  className="mt-1 w-full rounded-md bg-gray-700/60 border border-gray-600 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="12345678"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium">Varmekategori</label>
-                <input
-                  name="warm_category"
-                  value={form.warm_category}
-                  onChange={handleChange}
-                  className="mt-1 w-full rounded border px-2 py-1"
-                  placeholder="Kold, lun eller varm"
-                />
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex justify-end gap-3 pt-6">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-md border px-4 py-2"
+                  className="rounded-full border border-gray-500 px-4 py-2 text-gray-300 hover:bg-gray-700/50"
                 >
                   Annuller
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-md bg-brand px-4 py-2 text-white disabled:opacity-50"
+                  className="rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 px-5 py-2 text-white font-medium shadow-md disabled:opacity-50"
                 >
                   {loading ? 'Gemmer…' : 'Gem lead'}
                 </button>
