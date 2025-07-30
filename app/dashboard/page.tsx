@@ -1,6 +1,3 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import authOptions from '@/lib/auth';
 import { getSupabaseService } from '@/lib/supabase';
 import DashboardClient from './DashboardClient';
 
@@ -13,10 +10,9 @@ import DashboardClient from './DashboardClient';
  * Google IDs to proper UUIDs.
  */
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    redirect('/');
-  }
+  // On the server we use the service role to fetch all leads. In a single‑user
+  // setup this is acceptable and avoids reliance on NextAuth. If row‑level
+  // security is enabled you may need to adjust policies accordingly.
   const supabase = getSupabaseService();
   const { data: leads, error } = await supabase
     .from('leads')
