@@ -18,6 +18,8 @@ interface DashboardClientProps {
 export default function DashboardClient({ initialLeads }: DashboardClientProps) {
   const [view, setView] = useState<'kanban' | 'table'>('kanban');
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  // Track whether AI lead generation is currently in progress
+  const [generating, setGenerating] = useState(false);
 
   const refresh = async () => {
     const supabase = getSupabaseBrowser();
@@ -28,11 +30,32 @@ export default function DashboardClient({ initialLeads }: DashboardClientProps) 
     setLeads(data ?? []);
   };
 
+  /**
+   * Handler that triggers the AI lead generation endpoint. When invoked it
+   * issues a POST request to `/api/newLeads`. While the request is in
+   * progress a loading state is shown. After completion the dashboard
+   * refreshes its data. Errors are logged to the console for debugging.
+   */
+  const handleGenerateLeads = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetch('/api/newLeads', { method: 'POST' });
+      const data = await res.json();
+      console.log('Leads genereret:', data);
+    } catch (err) {
+      console.error('Fejl ved generering:', err);
+    } finally {
+      setGenerating(false);
+      await refresh();
+    }
+  };
+
   return (
     <div className="p-4 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Lead‑dashboard</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {/* View toggles */}
           <button
             onClick={() => setView('kanban')}
             className={`rounded px-3 py-1 text-sm font-medium ${
@@ -48,6 +71,16 @@ export default function DashboardClient({ initialLeads }: DashboardClientProps) 
             }`}
           >
             Tabel
+          </button>
+          {/* Generate leads button */}
+          <button
+            onClick={handleGenerateLeads}
+            disabled={generating}
+            className={`rounded px-3 py-1 text-sm font-medium ${
+              generating ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'
+            }`}
+          >
+            {generating ? 'Genererer…' : 'Generér leads'}
           </button>
         </div>
       </div>
