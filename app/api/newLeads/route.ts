@@ -39,27 +39,43 @@ export async function POST(req: NextRequest) {
   // UUID via `auth.uid()`.
   let inserted = 0;
   for (const lead of generated) {
-    // Some AI responses may use either camelCase (contactPerson) or snake_case (contact_person).
-    // Cast to any to avoid TypeScript complaints about unknown properties.
+    // Extract fields from the AI response. Some models may use camelCase or snake_case.
     const name: string = (lead as any).contactPerson || (lead as any).contact_person || 'Ukendt kontakt';
     const company: string | null = (lead.company as any) || null;
     const email: string | null = (lead.email as any) || null;
     const phone: string | null = (lead.phone as any) || null;
-    // Only insert if a company name is provided
+    // Skip leads without a company name.
     if (!company) continue;
-    const { error } = await supabase
+    // Check if a lead with the same name and company already exists. Because the
+    // `leads` table does not have a unique constraint on these columns, using
+    // `upsert` with onConflict will fail. Instead we perform a simple lookup
+    // and only insert if no existing row is found. We ignore any error from
+    // the existence check and proceed to insert on error to avoid silently
+    // skipping valid leads.
+    try {
+      const { data: existing, error: existErr } = await supabase
+        .from('leads')
+        .select('id')
+        .eq('name', name)
+        .eq('company', company)
+        .maybeSingle();
+      if (!existErr && existing) {
+        // Row already exists, skip insertion.
+        continue;
+      }
+    } catch (e) {
+      // Ignore lookup errors and attempt to insert anyway.
+    }
+    const { error: insertError } = await supabase
       .from('leads')
-      .upsert(
-        {
-          name,
-          company,
-          status: 'new',
-          email,
-          phone,
-        },
-        { onConflict: 'name,company' }
-      );
-    if (!error) inserted++;
+      .insert({
+        name,
+        company,
+        status: 'new',
+        email,
+        phone,
+      });
+    if (!insertError) inserted++;
   }
   return NextResponse.json({ inserted });
 }
