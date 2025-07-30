@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase';
 
 interface AddLeadModalProps {
-  userId: string;
+  /**
+   * Callback invoked after a lead is successfully inserted. The parent
+   * component should refresh its lead list in this callback.
+   */
   onLeadAdded: () => Promise<void>;
 }
 
-export default function AddLeadModal({ userId, onLeadAdded }: AddLeadModalProps) {
+export default function AddLeadModal({ onLeadAdded }: AddLeadModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -16,7 +19,7 @@ export default function AddLeadModal({ userId, onLeadAdded }: AddLeadModalProps)
     company: '',
     email: '',
     phone: '',
-    warm_category: ''
+    warm_category: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,12 +31,12 @@ export default function AddLeadModal({ userId, onLeadAdded }: AddLeadModalProps)
     setLoading(true);
     const supabase = getSupabaseBrowser();
     await supabase.from('leads').insert({
-      user_id: userId,
       name: form.name,
       company: form.company || null,
       email: form.email || null,
       phone: form.phone || null,
-      warm_category: form.warm_category || null
+      warm_category: form.warm_category || null,
+      status: 'new',
     });
     setLoading(false);
     setOpen(false);
