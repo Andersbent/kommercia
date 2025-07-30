@@ -8,11 +8,14 @@ import type { Lead } from '@/components/LeadBoard';
 import { getSupabaseBrowser } from '@/lib/supabase';
 
 interface DashboardClientProps {
+  /**
+   * The initial batch of leads fetched server‑side. Since the MVP only
+   * supports a single user, we do not differentiate by user ID.
+   */
   initialLeads: Lead[];
-  userId: string;
 }
 
-export default function DashboardClient({ initialLeads, userId }: DashboardClientProps) {
+export default function DashboardClient({ initialLeads }: DashboardClientProps) {
   const [view, setView] = useState<'kanban' | 'table'>('kanban');
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
 
@@ -21,7 +24,6 @@ export default function DashboardClient({ initialLeads, userId }: DashboardClien
     const { data } = await supabase
       .from('leads')
       .select('*')
-      .eq('user_id', userId)
       .order('created_at', { ascending: false });
     setLeads(data ?? []);
   };
@@ -55,7 +57,7 @@ export default function DashboardClient({ initialLeads, userId }: DashboardClien
         <LeadsTable leads={leads} refresh={refresh} />
       )}
       {/* Add Lead Modal & button */}
-      <AddLeadModal userId={userId} onLeadAdded={refresh} />
+      <AddLeadModal onLeadAdded={refresh} />
     </div>
   );
 }
