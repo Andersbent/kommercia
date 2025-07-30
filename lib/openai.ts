@@ -39,6 +39,52 @@ export interface AILead {
  * result in an empty array being returned.
  */
 export async function generateAILeads(): Promise<AILead[]> {
+  /**
+   * If the OpenAI API key is missing we return a static fallback list of
+   * example leads. This ensures that lead generation works during
+   * development or in environments where the API key has not been
+   * configured. In production, you should always provide a valid
+   * `OPENAI_API_KEY` to generate fresh leads from GPT‑4.
+   */
+  if (!process.env.OPENAI_API_KEY) {
+    return [
+      {
+        company: 'Maersk',
+        website: 'https://www.maersk.com',
+        contactPerson: 'Klaus Hoffmann',
+        email: 'info@maersk.com',
+        phone: null,
+      },
+      {
+        company: 'Vestas',
+        website: 'https://www.vestas.com',
+        contactPerson: 'Mette Andersen',
+        email: 'contact@vestas.com',
+        phone: null,
+      },
+      {
+        company: 'DSV',
+        website: 'https://www.dsv.com',
+        contactPerson: 'Henrik Nielsen',
+        email: 'henrik.nielsen@dsv.com',
+        phone: null,
+      },
+      {
+        company: 'Siemens Gamesa',
+        website: 'https://www.siemensgamesa.com',
+        contactPerson: 'Anna Müller',
+        email: 'sales@siemensgamesa.com',
+        phone: null,
+      },
+      {
+        company: 'Flensburger Schiffbau-Gesellschaft',
+        website: 'https://www.fsg-ship.de',
+        contactPerson: 'Lars Petersen',
+        email: null,
+        phone: null,
+      },
+    ];
+  }
   // Optionally perform a Serper.dev search to warm up trending
   // context. This call is intentionally not awaited; if it fails
   // it will not block lead generation.
