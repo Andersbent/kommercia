@@ -20,7 +20,10 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const userId = (session.user as any).id;
+  // We only allow a single whitelisted user in this MVP, so we do not rely on
+  // a numeric or UUID user identifier. Instead we insert leads without a
+  // user_id to avoid type mismatches when the Google provider's `sub`
+  // property (a long numeric string) cannot be cast to a Postgres UUID.
   const supabase = getSupabaseService();
   // Invoke the AI to generate a list of leads. This call may take
   // several seconds as it contacts OpenAI.
@@ -29,9 +32,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to generate leads' }, { status: 500 });
   }
   // Insert each generated lead into the existing `leads` table. We use
-  // upsert on user_id, name and company to avoid duplicates. If the
-  // `ai_leads` table exists in your Supabase database you can revert
-  // this to that table instead.
+  // upsert on name and company to avoid duplicates. The `user_id` field is
+  // intentionally omitted because the NextAuth `user.id` from the Google
+  // provider is not a valid Postgres UUID. In a multi‑user setup you
+  // should instead add a `user_email` column or fetch the Supabase auth
+  // UUID via `auth.uid()`.
   let inserted = 0;
   for (const lead of generated) {
     // Some AI responses may use either camelCase (contactPerson) or snake_case (contact_person).
@@ -46,14 +51,13 @@ export async function POST(req: NextRequest) {
       .from('leads')
       .upsert(
         {
-          user_id: userId,
           name,
           company,
           status: 'new',
           email,
           phone,
         },
-        { onConflict: 'user_id,name,company' }
+        { onConflict: 'name,company' }
       );
     if (!error) inserted++;
   }
