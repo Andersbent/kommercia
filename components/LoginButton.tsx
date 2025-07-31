@@ -18,9 +18,9 @@ export default function LoginButton() {
   return (
     <button
       onClick={handleLogin}
-      className="px-6 py-3 bg-white text-black font-semibold rounded-md shadow hover:bg-gray-200 transition"
+      className="px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-400 text-white font-semibold rounded-xl shadow-md hover:brightness-110 transition-all duration-200"
     >
-      Log ind med Google
+      Enter
     </button>
   )
 }
