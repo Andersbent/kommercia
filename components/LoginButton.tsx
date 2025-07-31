@@ -1,17 +1,23 @@
-"use client";
 
-import { signIn } from 'next-auth/react';
+'use client'
 
-/**
- * Renders a button that triggers Google sign‑in via NextAuth.
- */
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
 export default function LoginButton() {
+  const supabase = createClientComponentClient()
+
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    })
+  }
+
   return (
     <button
-      onClick={() => signIn('google')}
-      className="mt-6 rounded-md bg-brand px-6 py-3 text-white transition-colors hover:bg-brand-light"
+      onClick={handleLogin}
+      className="px-6 py-3 bg-white text-black font-semibold rounded-md shadow hover:bg-gray-200 transition"
     >
       Log ind med Google
     </button>
-  );
+  )
 }
