@@ -1,11 +1,14 @@
 
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function LoginButton() {
-  const supabase = createClientComponentClient()
-
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
