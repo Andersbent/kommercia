@@ -1,11 +1,12 @@
-import { redirect } from 'next/navigation';
 
-/**
- * Default page that redirects visitors to the login screen. This allows the
- * application to present the Supabase login form instead of relying on
- * NextAuth’s Google login. Feel free to update the path if you rename
- * the login route.
- */
+import LoginButton from '@/components/LoginButton'
+
 export default function HomePage() {
-  redirect('/login');
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#1A1B29] via-[#2C2F46] to-[#10131C] text-white text-center p-8">
+      <h1 className="text-4xl font-bold mb-4">Kommercia</h1>
+      <p className="text-lg mb-8">Your Commercial Department in the Cloud</p>
+      <LoginButton />
+    </div>
+  )
 }
