@@ -1,19 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export function getSupabaseService() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false },
-  });
-}
+import { createBrowserClient } from '@supabase/ssr'
 
 export function getSupabaseBrowser() {
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 }
-
-export default supabase;
