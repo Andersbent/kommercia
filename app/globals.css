@@ -1,57 +1,9 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* You can add global styles to this file */
-
+/* Optional: global styles */
 body {
-    @apply bg-background text-neutral-100;
-
-  font-family: theme('fontFamily.sans');
-}
-
-
-/* Dark theme overrides */
-
-/* Table text color */
-table {
-  @apply text-neutral-200;
-}
-
-thead {
-  @apply text-neutral-400;
-}
-
-/* Hover background for table rows */
-tbody tr:hover {
-  background-color: theme('colors.background.surface');
-}
-
-/* Override light backgrounds */
-.bg-white,
-.bg-gray-50,
-.bg-neutral-50 {
-  background-color: theme('colors.background.card');
-}
-
-/* Override text colors */
-.text-gray-900 {
-  color: theme('colors.neutral.100');
-}
-.text-gray-800 {
-  color: theme('colors.neutral.200');
-}
-.text-gray-700 {
-  color: theme('colors.neutral.300');
-}
-.text-gray-600 {
-  color: theme('colors.neutral.400');
-}
-.text-gray-500 {
-  color: theme('colors.neutral.500');
-}
-
-/* Override divide colors */
-.divide-gray-200 {
-  border-color: theme('colors.neutral.700');
+  @apply bg-black;
 }
